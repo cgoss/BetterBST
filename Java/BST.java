@@ -154,9 +154,21 @@ public class BST<Key extends Comparable<Key>, Value> {
             if (x.right == null) return x.left;
             if (x.left  == null) return x.right;
             Node t = x;
-            x = min(t.right);
-            x.right = deleteMin(t.right);
-            x.left = t.left;
+			//if the tree on the left is larger Hibbard Delete from the left
+			//otherwise delete right.
+			boolean dir = (level(x.left)> level(x.right);
+			
+            x = dir ? min(t.right) : max(t.left);
+			if (dir)
+			{
+				x.right = deleteMin(t.right);
+				x.left = t.left;
+			}
+			else
+			{
+				x.left = deleteMax(t.left);
+				x.right = t.right;
+			}
         } 
         x.N = size(x.left) + size(x.right) + 1;
 		x.L = ((level(x.left)>level(x.right))?level(x.left):level(x.right))+1;
