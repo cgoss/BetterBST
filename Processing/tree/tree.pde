@@ -23,7 +23,7 @@ boolean bInsert = true;
 boolean bDelete = true;
 boolean bBalance = true;
 void setup() {
-  
+  f = loadFont( "Courier-30.vlw" );
   //Test runs through 
  String test = "S E A R C H E X A M P L E ";
   
@@ -88,7 +88,13 @@ void buildBST()
 }
 int rand = 0;
 int i = 0;
+
+double avg = 0;
+int itteration = 0;
+int max = 0;
+
 void draw() {
+
   if (tree ==null)
    { buildBST();
    }
@@ -107,7 +113,17 @@ void draw() {
            
              }
          if (debug)    println("delete insert");
-  background(0);
+  background(255);
+    textFont(f,24);
+  fill(0);
+  avg = avg + tree.height()+1;
+  itteration++;
+  if (max < tree.height()+1) {max = tree.height()+1;}
+ text("N =" + tree.size(),15,80);
+ text("Max = " + (tree.height()+1),15,100);
+ text("Avg = "+ (avg/itteration),15,120);
+ text("Opt = 7",15,140);
+  //background(#AAFFEE);
   frameRate(30);
   stroke(255);
   // Let's pick an angle 0 to 90 degrees based on the mouse position
@@ -148,8 +164,11 @@ void draw() {
   else if (bBalance)
   saveFrame(BalanceOnly);
  }
+ 
+  
   
 }
+PFont f;
 
 float Htree = 1.568342;
 
