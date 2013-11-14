@@ -34,11 +34,13 @@ public class BST<Key extends Comparable<Key>, Value> {
         private Value val;         // associated data
         private Node left, right;  // left and right subtrees
         private int N;             // number of nodes in subtree
+		private int L;
 
         public Node(Key key, Value val, int N) {
             this.key = key;
             this.val = val;
             this.N = N;
+			this.L = 0;
         }
     }
 
@@ -57,7 +59,12 @@ public class BST<Key extends Comparable<Key>, Value> {
         if (x == null) return 0;
         else return x.N;
     }
-
+	//return the height of the current node. 
+	//0 = no nodes under current node. 
+	public int level(Node x){
+    	if (x == null) return -1;
+        else return x.L;
+    }
    /***********************************************************************
     *  Search BST for given key, and return associated value if found,
     *  return null if not found
@@ -97,6 +104,7 @@ public class BST<Key extends Comparable<Key>, Value> {
         else if (cmp > 0) x.right = put(x.right, key, val);
         else              x.val   = val;
         x.N = 1 + size(x.left) + size(x.right);
+		x.L = ((level(x.left)>level(x.right))?level(x.left):level(x.right))+1;
         return x;
     }
 
@@ -114,6 +122,7 @@ public class BST<Key extends Comparable<Key>, Value> {
         if (x.left == null) return x.right;
         x.left = deleteMin(x.left);
         x.N = size(x.left) + size(x.right) + 1;
+		x.L = ((level(x.left)>level(x.right))?level(x.left):level(x.right))+1;
         return x;
     }
 
@@ -127,6 +136,7 @@ public class BST<Key extends Comparable<Key>, Value> {
         if (x.right == null) return x.left;
         x.right = deleteMax(x.right);
         x.N = size(x.left) + size(x.right) + 1;
+		x.L = ((level(x.left)>level(x.right))?level(x.left):level(x.right))+1;
         return x;
     }
 
@@ -149,6 +159,7 @@ public class BST<Key extends Comparable<Key>, Value> {
             x.left = t.left;
         } 
         x.N = size(x.left) + size(x.right) + 1;
+		x.L = ((level(x.left)>level(x.right))?level(x.left):level(x.right))+1;
         return x;
     } 
 
