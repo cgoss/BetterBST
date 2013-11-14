@@ -105,7 +105,32 @@ public class BST<Key extends Comparable<Key>, Value> {
         else              x.val   = val;
         x.N = 1 + size(x.left) + size(x.right);
 		x.L = ((level(x.left)>level(x.right))?level(x.left):level(x.right))+1;
+		x = Balance(x);
         return x;
+    }
+	
+	 //used to shift node from left to right or vice versa.
+	 //Used in balance method
+	private Node putBack(Node x, Node source)
+    {
+    	 if (x == null)
+    		 {
+    		 source.L = 0;
+    		 source.N = 1;
+    		 return source;
+    		 }
+         int cmp = source.key.compareTo(x.key);
+         if      (cmp < 0) 
+         {	
+         	x.left  = putBack(x.left,  source);
+         }
+         else if (cmp > 0) 
+         {
+         	x.right = putBack(x.right, source);
+         }
+         x.L =  ((level(x.left)>=level(x.right))?level(x.left):level(x.right))+1;
+         x.N = 1 + size(x.left) + size(x.right);
+         return x;
     }
 
    /***********************************************************************
@@ -172,11 +197,56 @@ public class BST<Key extends Comparable<Key>, Value> {
         } 
         x.N = size(x.left) + size(x.right) + 1;
 		x.L = ((level(x.left)>level(x.right))?level(x.left):level(x.right))+1;
+		x = Balance(x);
         return x;
     } 
 
-
-   /***********************************************************************
+	
+	private Node Balance(Node x)
+	{
+		if (x.L < 2) return x; // if the node is less than 2 from the floor there is no real gain for balance.
+		
+		//if the node level is within 1 lvl of proper distribution
+		if (Math.ceil(Math.log(x.N)/log2)+1<x.L)
+		{
+			if((level(x.left) - level(x.right)) < -1)
+			{
+				if(	Math.ceil(Math.log(size(x.right))/log2)<level(x.right))
+				{
+					//Shift a node from the right tree
+					Node t = x;
+					x = min(x.right);
+					x.right= deleteMin(t.right); 
+					x.left = t.left;
+					t.left = t.right = null;
+					x.left =  putBack(x.left,t);
+				}
+			}
+			
+			//If the difference between the left and the right is > 1 level
+			//and the height of the left tree is larger than ideal
+			else if ((level(x.left) - level(x.right)>1))
+			{
+				if(Math.ceil(Math.log(size(x.left))/log2)<level(x.left))
+				{
+					//shift a node from the left tree
+					Node t = x;
+					x = max(x.left);
+					x.left= deleteMax(t.left); 
+					x.right = t.right;
+					t.left = t.right = null;
+					x.right =  putBack(x.right,t);
+				
+				}
+			}
+		}
+		//update the level
+		x.L = ((level(x.left)>level(x.right))?level(x.left):level(x.right))+1;
+		x.N = 1 + size(x.left) + size(x.right);
+		return x;
+	}
+	
+	/***********************************************************************
     *  Min, max, floor, and ceiling
     ***********************************************************************/
     public Key min() {
