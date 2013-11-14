@@ -30,6 +30,12 @@ public class BST<Key extends Comparable<Key>, Value> {
     private Node root;             // root of BST
 	double log2 = Math.log(2);		// log2
 	
+	/* Controls to enable and disable changes.*/
+	public Boolean EnableInsert = true;
+    public Boolean EnableDel = true;
+    public Boolean EnableBalance = true;
+	
+	
     private class Node {
         private Key key;           // sorted by key
         private Value val;         // associated data
@@ -44,6 +50,24 @@ public class BST<Key extends Comparable<Key>, Value> {
 			this.L = 0;
         }
     }
+	
+	 /***************
+     * debug flags 
+     * *********/
+     
+    public void setInsert(Boolean Enable)
+    {
+    	EnableInsert = Enable;
+    }
+    public void setDelete(Boolean Enable)
+    {
+    	EnableDel = Enable;
+    }
+    public void setBalance(Boolean Enable)
+    {
+    	EnableBalance = Enable;
+    }
+	
 
     // is the symbol table empty?
     public boolean isEmpty() {
@@ -103,7 +127,8 @@ public class BST<Key extends Comparable<Key>, Value> {
         int cmp = key.compareTo(x.key);
         if      (cmp < 0) 
 		{
-			if (level(x.left)>level(x.right))
+			if (level(x.left)>level(x.right)
+			&& EnableInsert)// if feature is turned off this will always drop out to normal operation
         	{
 				//insert candidate for current node
         		cmp = key.compareTo(max(x.left).key);
@@ -131,7 +156,8 @@ public class BST<Key extends Comparable<Key>, Value> {
 		}
         else if (cmp > 0) 
 		{
-			if (level(x.left)<level(x.right))
+			if (level(x.left)<level(x.right)
+			&& EnableInsert)// if feature is turned off this will always drop out to normal operation
         	{
 				//insert candidate for current node
 				cmp = key.compareTo(min(x.right).key);
@@ -312,6 +338,8 @@ public class BST<Key extends Comparable<Key>, Value> {
 			//otherwise delete right.
 			boolean dir = (level(x.left)> level(x.right);
 			
+			if (!EnableDel) dir = true;//if this feature is turned off always delete left.
+			
             x = dir ? min(t.right) : max(t.left);
 			if (dir)
 			{
@@ -333,6 +361,7 @@ public class BST<Key extends Comparable<Key>, Value> {
 	
 	private Node Balance(Node x)
 	{
+		if(!EnableBalance) return x; // if this feature is turned off exit.
 		if (x.L < 2) return x; // if the node is less than 2 from the floor there is no real gain for balance.
 		
 		//if the node level is within 1 lvl of proper distribution
