@@ -28,7 +28,8 @@ import java.util.NoSuchElementException;
 
 public class BST<Key extends Comparable<Key>, Value> {
     private Node root;             // root of BST
-
+	double log2 = Math.log(2);		// log2
+	
     private class Node {
         private Key key;           // sorted by key
         private Value val;         // associated data
