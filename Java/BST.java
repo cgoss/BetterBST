@@ -102,12 +102,59 @@ public class BST<Key extends Comparable<Key>, Value> {
         int cmp = key.compareTo(x.key);
         if      (cmp < 0) 
 		{
-			x.left  = put(x.left,  key, val);
+			if (level(x.left)>level(x.right))
+        	{
+				//insert candidate for current node
+        		cmp = key.compareTo(max(x.left).key);
+				if (cmp>0)
+        		{
+					//Node to be inserted is the next logical candidate for succession
+					Node t = x;
+					x = new Node(key, val,1);
+					x.right = t.right;
+					x.left = t.left;
+					t.right = null;
+					t.left = null;
+					//send the current node to the right
+        			x.right = putMin(x.right,t);
+				}
+				else if(cmp!=0)//if cmp is 0 node is duplicate cut your losses
+				{
+					x = DemoteRight(x);
+					x.left  = put(x.left,  key, val);
+				}
+			}
+			else
+        		x.left  = put(x.left,  key, val);
 			x.L = ((level(x.left)>level(x.right))?level(x.left):level(x.right))+1;
 		}
         else if (cmp > 0) 
 		{
-			x.right = put(x.right, key, val);
+			if (level(x.left)<level(x.right))
+        	{
+				//insert candidate for current node
+				cmp = key.compareTo(min(x.right).key);
+				if (cmp<0)
+        		{
+					//Node to be inserted is the next logical candidate for succession
+					Node t = x;
+					x = new Node(key,val,1);
+					x.left = t.left;
+					x.right = t.right;
+					t.right = null;
+					t.left = null;
+					//send the current node to the left.
+					x.left = putMax(x.left,t);
+				}
+				else if (cmp!=0)//if cmp is 0 node is duplicate cut your losses
+				{
+					x = DemoteLeft(x);
+					x.right = put(x.right, key, val);
+				}
+				
+			}
+			else
+        		x.right = put(x.right, key, val);
 			x.L = ((level(x.left)>level(x.right))?level(x.left):level(x.right))+1;
 		}
         else              x.val   = val;
