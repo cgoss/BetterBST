@@ -151,15 +151,14 @@ public class BST<Key extends Comparable<Key>, Value> {
 					x = DemoteLeft(x);
 					x.right = put(x.right, key, val);
 				}
-				
 			}
 			else
         		x.right = put(x.right, key, val);
 			x.L = ((level(x.left)>level(x.right))?level(x.left):level(x.right))+1;
 		}
         else              x.val   = val;
-        x.N = 1 + size(x.left) + size(x.right);
 		
+        x.N = 1 + size(x.left) + size(x.right);
 		x = Balance(x);
         return x;
     }
