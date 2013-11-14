@@ -141,6 +141,45 @@ public class BST<Key extends Comparable<Key>, Value> {
          return x;
     }
 	
+	 public Node putMax(Node x, Node insert)
+    {
+		if (x == null) x=insert;
+		else
+		{
+			//the inserted node is larger than current node.
+			if(insert.key.compareTo(x.key)<0) 
+			{
+				insert.left = x;
+				x = insert;
+			}
+			else      
+				x.right = putMax(x.right, insert);
+		}
+		x.N = 1 + size(x.left) + size(x.right);
+		x.L =  ((level(x.left)>=level(x.right))?level(x.left):level(x.right))+1;
+		return x; 
+    }
+    
+    public Node putMin(Node x, Node insert)
+    {
+		if(x == null) x = insert;
+		else
+		{
+			//the current node is less than what is being inserted.
+			if(insert.key.compareTo(x.key)>0)
+			{
+				insert.right = x;
+				x = insert;
+				//return insert;
+			}
+			else
+			  x.left = putMin(x.left, insert);
+		}
+		  
+		x.N = 1 + size(x.left) + size(x.right);
+		x.L =  ((level(x.left)>=level(x.right))?level(x.left):level(x.right))+1;
+		return x; 
+    }
 
    /***********************************************************************
     *  Delete
@@ -174,6 +213,39 @@ public class BST<Key extends Comparable<Key>, Value> {
         return x;
     }
 	
+    private Node DemoteRight(Node x)
+    {
+     //Demote current node to the Right tree.
+        Node t = x;
+        x = max(x.left);
+        x.left= deleteMax(t.left); 
+        x.right = t.right;
+        x.N = t.N;
+        t.left = t.right = null;
+        t.L = 0;
+        t.N = 1;
+        x.right = putMin(x.right,t); 
+        x.N = 1 + size(x.left) + size(x.right);
+        x.L =  ((level(x.left)>=level(x.right))?level(x.left):level(x.right))+1;
+        return x; 
+    }
+    
+    private Node DemoteLeft(Node x)
+    {
+       //Demote the current node to the left.
+        Node t = x;
+        x = min(x.right);
+        x.right= deleteMin(t.right); 
+        x.left = t.left;
+        x.N = t.N;
+        t.left = t.right = null;
+        t.L = 0;
+        t.N = 1;
+        x.left = putMax(x.left,t); 
+	    x.N = 1 + size(x.left) + size(x.right);
+	    x.L =  ((level(x.left)>=level(x.right))?level(x.left):level(x.right))+1;
+        return x;
+    }
 
     public void delete(Key key) {
         root = delete(root, key);
