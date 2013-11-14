@@ -100,11 +100,19 @@ public class BST<Key extends Comparable<Key>, Value> {
     private Node put(Node x, Key key, Value val) {
         if (x == null) return new Node(key, val, 1);
         int cmp = key.compareTo(x.key);
-        if      (cmp < 0) x.left  = put(x.left,  key, val);
-        else if (cmp > 0) x.right = put(x.right, key, val);
+        if      (cmp < 0) 
+		{
+			x.left  = put(x.left,  key, val);
+			x.L = ((level(x.left)>level(x.right))?level(x.left):level(x.right))+1;
+		}
+        else if (cmp > 0) 
+		{
+			x.right = put(x.right, key, val);
+			x.L = ((level(x.left)>level(x.right))?level(x.left):level(x.right))+1;
+		}
         else              x.val   = val;
         x.N = 1 + size(x.left) + size(x.right);
-		x.L = ((level(x.left)>level(x.right))?level(x.left):level(x.right))+1;
+		
 		x = Balance(x);
         return x;
     }
@@ -132,6 +140,7 @@ public class BST<Key extends Comparable<Key>, Value> {
          x.N = 1 + size(x.left) + size(x.right);
          return x;
     }
+	
 
    /***********************************************************************
     *  Delete
@@ -164,6 +173,7 @@ public class BST<Key extends Comparable<Key>, Value> {
 		x.L = ((level(x.left)>level(x.right))?level(x.left):level(x.right))+1;
         return x;
     }
+	
 
     public void delete(Key key) {
         root = delete(root, key);
