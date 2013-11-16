@@ -192,7 +192,7 @@ public class BST<Key extends Comparable<Key>, Value> {
 	
 	 //used to shift node from left to right or vice versa.
 	 //Used in balance method
-	private Node putBack(Node x, Node source)
+	private Node putBack(Node x, Node source) 
     {
     	 if (x == null)
     		 {
@@ -226,7 +226,19 @@ public class BST<Key extends Comparable<Key>, Value> {
 				x = insert;
 			}
 			else      
-				x.right = putMax(x.right, insert);
+				{
+					x.right = putMax(x.right, insert);
+					//we just instered something to right
+					if (x.left == null && x.right.left == null)
+					  {
+						Node t = x.right;
+						x.right = null;
+						x.N = 1 + size(x.left) + size(x.right);
+						x.L = ((level(x.left)>=level(x.right))?level(x.left):level(x.right))+1;
+						t.left = x;
+						x = t;
+					  }
+				}
 		}
 		x.N = 1 + size(x.left) + size(x.right);
 		x.L =  ((level(x.left)>=level(x.right))?level(x.left):level(x.right))+1;
@@ -246,7 +258,18 @@ public class BST<Key extends Comparable<Key>, Value> {
 				//return insert;
 			}
 			else
-			  x.left = putMin(x.left, insert);
+			{
+				x.left = putMin(x.left, insert);
+				if (x.right == null && x.left.right == null)
+				{
+				  Node t = x.left;
+				  x.left = null;
+				  x.N = 1 + size(x.left) + size(x.right);
+				  x.L = ((level(x.left)>=level(x.right))?level(x.left):level(x.right))+1;
+				  t.right = x;
+				  x=t;
+				}
+			}
 		}
 		  
 		x.N = 1 + size(x.left) + size(x.right);

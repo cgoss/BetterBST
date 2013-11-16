@@ -2,7 +2,7 @@
 Project used to represent the nodes of a BST with my implementation.
 
 */
-String bstDirectory = "INSERTDIRECTORYHERE";
+String bstDirectory = "E:/Images/StartBad/";
 String BSTFileName = "BST-########.png";
 String deleteSaveDir = bstDirectory+""+BSTFileName;
 String deleteSaveNoBalance = bstDirectory+""+BSTFileName;
@@ -18,7 +18,7 @@ float theta;
 BST tree;
 boolean debug = false;
 boolean bTest = false;
-boolean outputImage = false;
+boolean outputImage = true;
 boolean bInsert = true;
 boolean bDelete = true;
 boolean bBalance = true;
@@ -58,9 +58,10 @@ void setup() {
 void buildBST()
 {
   tree = new BST<String, Integer>();
-        tree.setInsert(bInsert);
-        tree.setDelete(bDelete);
-        tree.setBalance(bBalance);
+           tree.setInsert(true);
+        tree.setDelete(true);
+        tree.setBalance(true);
+      
         int rand = 0;
         //load the array.
         for (int i = 0; tree.size() < 155; i++) 
@@ -96,20 +97,28 @@ int max = 0;
 void draw() {
 
   if (tree ==null)
-   { buildBST();
+   { 
+     buildBST();
+     //tree =  new BST<String, Integer>();
+        tree.setInsert(bInsert);
+        tree.setDelete(bDelete);
+        tree.setBalance(bBalance);
    }
+    
    i++;
   //println("test");
  // println(tree.size());
-       for (int n = 0; tree.size() > 154; n++) 
+       for (int n = 0; tree.size() > 149; n++) 
              {
              tree.delete(array[(int)random(255)]);
+             continue;
              }
-     for (int n = 0; tree.size() < 155; n++) 
+     for (int n = 0; tree.size() < 150; n++) 
              {    
                rand = (int)random(255);
              
                tree.put(array[rand], i); 
+               continue;
            
              }
          if (debug)    println("delete insert");
@@ -123,6 +132,8 @@ void draw() {
  text("Max = " + (tree.height()+1),15,100);
  text("Avg = "+ (avg/itteration),15,120);
  text("Opt = 7",15,140);
+ text("Root Key = " + tree.myRoot().key,15,160);
+ text("Root Value = " + tree.myRoot().val,15,180);
   //background(#AAFFEE);
   frameRate(30);
   stroke(255);
@@ -239,8 +250,8 @@ public static class BST<Key extends Comparable<Key>, Value> {
     public Boolean EnableDel = false;
     public Boolean EnableBalance = false;
     public class Node {
-        private Key key;           // sorted by key
-        private Value val;         // associated data
+        public Key key;           // sorted by key
+        public Value val;         // associated data
         private Node left, right;  // left and right subtrees
         public int N;             // number of nodes in subtree
         public int L;          // level of node
@@ -426,7 +437,7 @@ public static class BST<Key extends Comparable<Key>, Value> {
     *  If key already exists, update with new value
     ***********************************************************************/
     public void put(Key key, Value val) {
-      println(key);
+    //  println(key);
         if (val == null) { delete(key); return; }
         root = put(root, key, val);
         assert check();
@@ -445,7 +456,19 @@ public static class BST<Key extends Comparable<Key>, Value> {
         x = insert;
       }
       else      
+      {
         x.right = putMax(x.right, insert);
+        //we just instered something to right
+        if (x.left == null && x.right.left == null)
+          {
+            Node t = x.right;
+            x.right = null;
+            x.N = 1 + size(x.left) + size(x.right);
+            x.L = ((level(x.left)>=level(x.right))?level(x.left):level(x.right))+1;
+            t.left = x;
+            x = t;
+          }
+      }   
       }
       x.N = 1 + size(x.left) + size(x.right);
       x.L =  ((level(x.left)>=level(x.right))?level(x.left):level(x.right))+1;
@@ -465,7 +488,18 @@ public static class BST<Key extends Comparable<Key>, Value> {
         //return insert;
      }
      else
+     {
       x.left = putMin(x.left, insert);
+      if (x.right == null && x.left.right == null)
+        {
+          Node t = x.left;
+          x.left = null;
+          x.N = 1 + size(x.left) + size(x.right);
+          x.L = ((level(x.left)>=level(x.right))?level(x.left):level(x.right))+1;
+          t.right = x;
+          x=t;
+        }
+     }
      }
      x.N = 1 + size(x.left) + size(x.right);
      x.L =  ((level(x.left)>=level(x.right))?level(x.left):level(x.right))+1;
@@ -770,11 +804,57 @@ public static class BST<Key extends Comparable<Key>, Value> {
          int cmp = source.key.compareTo(x.key);
          if      (cmp < 0) 
          {  
-           x.left  = putBack(x.left,  source);
+           if (level(x.left)>level(x.right))
+           {
+               cmp = source.key.compareTo(max(x.left).key);//Compare the logical successor to the left
+              //insert candidate for current node
+              if (cmp>0)
+              {
+                /*
+                The node being inserted is the next logical successor.
+                Demote the current node and replace it with the node being inserted.
+                */
+                Node t = x;
+                x = source;
+                x.right = t.right;
+                x.left = t.left;
+                t.right = null;
+                t.left = null;
+                x.right = putMin(x.right,t);
+                //x.right = put(x.right,t.key,t.val);//standard put would evaluate right node where the result is already known and therefore redundant.
+              }
+              else
+               x.left  = putBack(x.left,  source);
+           }
+           else if(cmp!=0)
+             x.left  = putBack(x.left,  source);
          }
          else if (cmp > 0) 
          {
-           x.right = putBack(x.right, source);
+           if (level(x.left)<level(x.right))
+           {
+               cmp = source.key.compareTo(min(x.right).key);//Compare the logical successor to the right
+              //insert candidate for current node
+              if (cmp<0)
+              {
+                   /*
+                The node being inserted is the next logical successor.
+                Demote the current node and replace it with the node being inserted.
+                */
+                Node t = x;
+                x = source;
+                x.left = t.left;
+                x.right = t.right;
+                t.right = null;
+                t.left = null;
+                x.left = putMax(x.left,t);
+                //x.left = put(x.left,t.key,t.val);//standard put would evaluate right node where the result is already known and therefore redundant.
+              }
+              else if(cmp!=0)
+             x.right = putBack(x.right, source);
+           }
+           else 
+             x.right = putBack(x.right, source);
          }
          x.L =  ((level(x.left)>=level(x.right))?level(x.left):level(x.right))+1;
          x.N = 1 + size(x.left) + size(x.right);
@@ -789,13 +869,13 @@ private Node Bal(Node x)
   //No need to look if the height < 2
   if (x.L < 2) return x;
   
-  if (Math.ceil(Math.log(x.N)/log2)+1<x.L)
+  if (Math.ceil(Math.log(x.N)/log2)<x.L)
   {
 
     // If the difference between the right tree and left is > 1 levels
     //and the height of the right tree is larger than ideal
     
-    if((level(x.left) - level(x.right)) < -1)
+    if((level(x.left) - level(x.right)) < 0)
     {
       if(  Math.ceil(Math.log(size(x.right))/log2)<level(x.right))
       {
@@ -811,7 +891,7 @@ private Node Bal(Node x)
     
     //If the difference between the left and the right is > 1 level
     //and the height of the left tree is larger than ideal
-    else if ((level(x.left) - level(x.right)>1))
+    else if ((level(x.left) - level(x.right)>0))
     {
       if(Math.ceil(Math.log(size(x.left))/log2)<level(x.left))
       {
