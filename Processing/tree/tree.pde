@@ -12,16 +12,29 @@ String InsertWBalance =bstDirectory+""+BSTFileName;
 String NoBalance =bstDirectory+""+BSTFileName;
 String BalanceOnly =bstDirectory+""+BSTFileName;
   
-  
-  
-float theta;   
+  int rand = 0;
+int i = 0;
+double totalInsTimeMils = 0;
+double totalDelTimeMils = 0;
+double totalSearchTimeMils = 0;
+double avgTimeMils = 0;
+double avgInsTimeMils = 0;
+double avgDelTimeMils = 0;
+double avgSearchTimeMils = 0;
+double begin =0;
+ 
+double avg = 0;
+int itteration = 0;
+int max = 0;
+float theta;
+
 BST tree;
-boolean debug = false;
+boolean debug = true;
 boolean bTest = false;
 boolean outputImage = true;
-boolean bInsert = true;
-boolean bDelete = true;
-boolean bBalance = true;
+boolean bInsert = false;
+boolean bDelete = false;
+boolean bBalance = false;
 void setup() {
   f = loadFont( "Courier-30.vlw" );
   //Test runs through 
@@ -32,11 +45,15 @@ void setup() {
     BST<String, Integer> st = new BST<String, Integer>();
     st.setInsert(true);
     st.setDelete(true);
+    if (debug)
+               println("run Test");
     for (int i = 0; i < N; i++) 
     {
         st.put(keys[i], i);
        st.check(); 
     }
+    if (debug)
+               println("test complete");
     buildBST();
     frameRate(16);
     size(1024, 768);
@@ -87,15 +104,11 @@ void buildBST()
         }
 }
 }
-int rand = 0;
-int i = 0;
 
-double avg = 0;
-int itteration = 0;
-int max = 0;
 
 void draw() {
-
+if (debug)
+               println("draw");
   if (tree ==null)
    { 
      buildBST();
@@ -103,37 +116,85 @@ void draw() {
         tree.setInsert(bInsert);
         tree.setDelete(bDelete);
         tree.setBalance(bBalance);
+        tree.setDebug(debug);
    }
     
    i++;
-  //println("test");
- // println(tree.size());
+  
        for (int n = 0; tree.size() > 149; n++) 
              {
-             tree.delete(array[(int)random(255)]);
-             continue;
+               if (debug)
+               println(tree.size());
+               String toDelete = array[(int)random(255)];
+              String x = tree.selectkey(toDelete);
+             if (x != null)
+               {
+               if (debug)
+               println("begin delete " + x);
+               begin = millis();
+               tree.delete(toDelete);
+               totalDelTimeMils = totalDelTimeMils + (begin -millis());
+               avgDelTimeMils = totalDelTimeMils / i;
+               if (debug)
+               println("complete delete");
+               continue;
+               } 
+             
              }
      for (int n = 0; tree.size() < 150; n++) 
              {    
                rand = (int)random(255);
-             
-               tree.put(array[rand], i); 
-               continue;
+               if (debug)
+               println(tree.size());
+             if (tree.selectkey(array[rand])== null)
+               {
+                 if (debug)
+               println("insert ");
+                   begin = millis();
+                 //  StdOut.println("Insert " + array[rand]);  
+                   tree.put(array[rand], i); 
+                   totalInsTimeMils = totalInsTimeMils+ (begin-millis());
+                   avgInsTimeMils = totalInsTimeMils / i;
+                   //st.put(keys[rand], i);
+                   if (debug)
+                     println("insert complete");
+                   continue;
+               }
            
              }
-         if (debug)    println("delete insert");
+             Boolean notfound = true;
+             while(notfound)
+             {
+               rand = (int)random(255);
+               if (tree.selectkey(array[rand])!= null)
+               {
+                 if(debug)
+                 println("search");
+                notfound = false;
+                  begin = millis();
+                 tree.select(array[rand]);
+                 totalSearchTimeMils = totalSearchTimeMils+ (begin - millis());
+                   avgSearchTimeMils = totalSearchTimeMils / i;
+               }
+              
+             }
+             notfound = true;
+         if (debug)    println("delete insert complete");
   background(255);
     textFont(f,24);
   fill(0);
   avg = avg + tree.height()+1;
   itteration++;
   if (max < tree.height()+1) {max = tree.height()+1;}
- text("N =" + tree.size(),15,80);
- text("Max = " + (tree.height()+1),15,100);
- text("Avg = "+ (avg/itteration),15,120);
- text("Opt = 7",15,140);
- text("Root Key = " + tree.myRoot().key,15,160);
- text("Root Value = " + tree.myRoot().val,15,180);
+ text("N =" + tree.size(),15,20);
+ text("Max = " + (tree.height()+1),15,40);
+ text("Avg = "+ (avg/itteration),15,60);
+ text("Opt = 7",15,80);
+ text("Root Key = " + tree.myRoot().key,15,100);
+ text("Root Value = " + tree.myRoot().val,15,120);
+ text("Avg Del = " + avgDelTimeMils,15,140);
+ text("Avg Ins = " + avgInsTimeMils,15,160);
+ text("Avg Search = " + totalSearchTimeMils,15,180);
   //background(#AAFFEE);
   frameRate(30);
   stroke(255);
@@ -249,6 +310,7 @@ public static class BST<Key extends Comparable<Key>, Value> {
     public Boolean EnableInsert = false;
     public Boolean EnableDel = false;
     public Boolean EnableBalance = false;
+    public Boolean xDebug = false;
     public class Node {
         public Key key;           // sorted by key
         public Value val;         // associated data
@@ -301,7 +363,13 @@ public static class BST<Key extends Comparable<Key>, Value> {
       }
       return true;
     }
-    
+    public String selectkey(Key key)
+    {
+      Node x = select(key);
+      if (x!=null)
+        return "found";
+      return null;
+    }
     public Node select(Key key)
     {
       return select(root,key);
@@ -354,7 +422,10 @@ public static class BST<Key extends Comparable<Key>, Value> {
     {
       EnableDel = Enable;
     }
-
+  public void setDebug(Boolean Enable)
+  {
+    xDebug = Enable;
+  }
     
     public Node myRoot(){
       return root;
@@ -913,6 +984,8 @@ private Node Bal(Node x)
   return x;
 }
 private Node delete(Node x, Key key) {
+  if (xDebug)
+  println(key);
     if (x == null) return null;
     int cmp = key.compareTo(x.key);
     //first node or we have not yet found the node
