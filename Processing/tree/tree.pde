@@ -29,11 +29,11 @@ int max = 0;
 float theta;
 
 BST tree;
-boolean debug = true;
+boolean debug = false;
 boolean bTest = false;
 boolean outputImage = true;
 boolean bInsert = false;
-boolean bDelete = false;
+boolean bDelete = true;
 boolean bBalance = false;
 void setup() {
   f = loadFont( "Courier-30.vlw" );
@@ -75,9 +75,9 @@ void setup() {
 void buildBST()
 {
   tree = new BST<String, Integer>();
-           tree.setInsert(true);
-        tree.setDelete(true);
-        tree.setBalance(true);
+           tree.setInsert(bInsert);
+        tree.setDelete(bDelete);
+        tree.setBalance(bBalance);
       
         int rand = 0;
         //load the array.
@@ -133,7 +133,7 @@ if (debug)
                println("begin delete " + x);
                begin = millis();
                tree.delete(toDelete);
-               totalDelTimeMils = totalDelTimeMils + (begin -millis());
+               totalDelTimeMils = totalDelTimeMils + (millis() - begin);
                avgDelTimeMils = totalDelTimeMils / i;
                if (debug)
                println("complete delete");
@@ -153,7 +153,7 @@ if (debug)
                    begin = millis();
                  //  StdOut.println("Insert " + array[rand]);  
                    tree.put(array[rand], i); 
-                   totalInsTimeMils = totalInsTimeMils+ (begin-millis());
+                   totalInsTimeMils = totalInsTimeMils + (millis() - begin);
                    avgInsTimeMils = totalInsTimeMils / i;
                    //st.put(keys[rand], i);
                    if (debug)
@@ -173,8 +173,10 @@ if (debug)
                 notfound = false;
                   begin = millis();
                  tree.select(array[rand]);
-                 totalSearchTimeMils = totalSearchTimeMils+ (begin - millis());
+                
+                 totalSearchTimeMils = totalSearchTimeMils + (millis() - begin);
                    avgSearchTimeMils = totalSearchTimeMils / i;
+                    println("searched");
                }
               
              }
@@ -187,14 +189,14 @@ if (debug)
   itteration++;
   if (max < tree.height()+1) {max = tree.height()+1;}
  text("N =" + tree.size(),15,20);
- text("Max = " + (tree.height()+1),15,40);
+ text("Max = " + max,15,40);
  text("Avg = "+ (avg/itteration),15,60);
  text("Opt = 7",15,80);
  text("Root Key = " + tree.myRoot().key,15,100);
  text("Root Value = " + tree.myRoot().val,15,120);
  text("Avg Del = " + avgDelTimeMils,15,140);
  text("Avg Ins = " + avgInsTimeMils,15,160);
- text("Avg Search = " + totalSearchTimeMils,15,180);
+ text("Avg Search = " + avgSearchTimeMils,15,180);
   //background(#AAFFEE);
   frameRate(30);
   stroke(255);
@@ -1004,6 +1006,7 @@ private Node delete(Node x, Key key) {
           Math.ceil(Math.log(size(x.left))/log2)+1 < level(x.left));
       if(EnableDel)
       {
+     //   println("delenabled");
         dir = !dir;
         Node t = x;
         x = dir? min(t.right): max(t.left);
